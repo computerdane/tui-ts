@@ -9,7 +9,11 @@ export type OutlineType = {
   bottomRight: string;
 };
 
-const outlines: { line: OutlineType; doubleline: OutlineType } = {
+const outlines: {
+  line: OutlineType;
+  thiccline: OutlineType;
+  doubleline: OutlineType;
+} = {
   line: {
     top: "─",
     bottom: "─",
@@ -19,6 +23,16 @@ const outlines: { line: OutlineType; doubleline: OutlineType } = {
     topRight: "┐",
     bottomLeft: "└",
     bottomRight: "┘",
+  },
+  thiccline: {
+    top: "━",
+    bottom: "━",
+    left: "┃",
+    right: "┃",
+    topLeft: "┏",
+    topRight: "┓",
+    bottomLeft: "┗",
+    bottomRight: "┛",
   },
   doubleline: {
     top: "═",

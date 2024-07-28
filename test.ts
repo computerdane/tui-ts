@@ -1,6 +1,5 @@
 import Screen from "./src/screen";
 import Box from "./src/components/box";
-import { sleep } from "bun";
 import chalk from "chalk";
 import Paragrah from "./src/components/paragraph";
 import outlines from "./src/outlines";
@@ -16,6 +15,7 @@ let box = Box(
     right: Screen.viewportWidth() - 13,
     title: "hello",
     titleStyle: chalk.blue,
+    outlineType: outlines.thiccline,
     // paddingTop: 2,
     // paddingLeft: 1,
     // paddingRight: 3,
@@ -56,4 +56,6 @@ let p = Paragrah(
 
 p.draw();
 
-await sleep(10000);
+for await (const line of console) {
+  process.exit();
+}
