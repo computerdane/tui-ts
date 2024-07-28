@@ -10,22 +10,32 @@ let box = Box(
   {
     top: 0,
     left: 0,
-    bottom: screen.height(),
-    right: screen.width(),
+    bottom: screen.height() - 13,
+    right: screen.width() - 13,
     title: "hello",
     titleStyle: chalk.blue,
+    paddingTop: 2,
+    paddingLeft: 1,
+    paddingRight: 3,
+    paddingBottom: 4,
   },
   screen,
 );
 
 box.draw();
 
-await sleep(2000);
+let child = Box(
+  {
+    top: 0,
+    left: 0,
+    bottom: screen.height(),
+    right: screen.width(),
+    title: "hello",
+    titleStyle: chalk.blue,
+  },
+  box,
+);
 
-box.clear();
-
-box.setBounds({ top: 2, left: 2, right: 20, bottom: 10 });
-
-box.draw();
+child.draw();
 
 await sleep(10000);

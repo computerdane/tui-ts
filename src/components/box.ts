@@ -12,8 +12,10 @@ type BoxConfig = {
   right: number;
   title: string;
   titlePadding: number;
-  paddingX: number;
-  paddingY: number;
+  paddingTop: number;
+  paddingLeft: number;
+  paddingBottom: number;
+  paddingRight: number;
   isOutlined: boolean;
   outlineType: OutlineType;
   outlineStyle: ChalkInstance;
@@ -27,8 +29,10 @@ const defaults: BoxConfig = {
   right: 0,
   title: "",
   titlePadding: 1,
-  paddingX: 0,
-  paddingY: 0,
+  paddingTop: 0,
+  paddingLeft: 0,
+  paddingBottom: 0,
+  paddingRight: 0,
   isOutlined: true,
   outlineType: outlines.line,
   outlineStyle: chalk.gray,
@@ -83,13 +87,27 @@ function Box<P extends RenderTarget>(_config: Partial<BoxConfig>, parent?: P) {
       }
     },
     render(lines: string[], x: number, y: number) {
-      for (const [row, line] of lines.entries()) {
-        target.cursorTo(config.left + x, config.top + y + row);
+      for (let [row, line] of lines
+        .slice(
+          0,
+          this.height() - y - 2 - config.paddingTop - config.paddingBottom,
+        )
+        .entries()) {
+        this.cursorTo(
+          config.left + x + config.paddingLeft,
+          config.top + y + config.paddingTop + row,
+        );
+        while (
+          stringLength(line) >
+          this.width() - x - 2 - config.paddingLeft - config.paddingRight
+        ) {
+          line = line.slice(0, -1);
+        }
         console.write(line);
       }
     },
     cursorTo(x: number, y: number) {
-      return target.cursorTo(config.left + x, config.top + y);
+      return target.cursorTo(config.left + x + 1, config.top + y + 1);
     },
     clear() {
       for (let row = 0; row < this.height(); row++) {

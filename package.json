@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "string-length": "^6.0.0"
+    "string-length": "^6.0.0",
+    "unicode-substring": "^1.0.0"
   }
 }
