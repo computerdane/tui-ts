@@ -1,9 +1,17 @@
 import readline from "node:readline";
+import os from "os";
 
-export type RenderTarget = {
+export type Parent = {
   render: (lines: string[], x: number, y: number) => void;
   viewportWidth: () => number;
   viewportHeight: () => number;
+};
+
+export type ElementPosition = {
+  top?: number;
+  left?: number;
+  bottom?: number;
+  right?: number;
 };
 
 const Screen = {
@@ -30,6 +38,9 @@ const Screen = {
   },
   clear() {
     console.clear();
+  },
+  shell() {
+    return os.platform() === "win32" ? "powershell.exe" : "bash";
   },
 };
 

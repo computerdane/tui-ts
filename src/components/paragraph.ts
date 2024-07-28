@@ -1,6 +1,6 @@
 import type { ChalkInstance } from "chalk";
 import chalk from "chalk";
-import Screen, { type RenderTarget } from "../screen";
+import Screen, { type Parent } from "../screen";
 import fuckery from "../fuckery";
 
 export type ParagraphConfig = {
@@ -15,11 +15,11 @@ const defaults: ParagraphConfig = {
   enableWrapping: false,
 };
 
-export default function Paragrah<P extends RenderTarget>(
+export default function Paragrah<P extends Parent>(
   _config: Partial<ParagraphConfig>,
-  parent?: P,
+  _parent?: P,
 ) {
-  const target = parent ?? Screen;
+  const parent = _parent ?? Screen;
 
   let config: ParagraphConfig = {
     ...defaults,
@@ -30,8 +30,8 @@ export default function Paragrah<P extends RenderTarget>(
     draw() {
       let lines = config.style(config.content).split("\n");
       if (config.enableWrapping) {
-        const viewportWidth = target.viewportWidth();
-        const viewportHeight = target.viewportHeight();
+        const viewportWidth = parent.viewportWidth();
+        const viewportHeight = parent.viewportHeight();
         const wrappedLines = [];
         for (let line of lines) {
           if (wrappedLines.length > viewportHeight) {
@@ -46,7 +46,11 @@ export default function Paragrah<P extends RenderTarget>(
         }
         lines = wrappedLines;
       }
-      target.render(lines, 0, 0);
+      parent.render(lines, 0, 0);
     },
+    setContent(content: string) {
+      config.content = content;
+    },
+    config,
   };
 }

@@ -2,21 +2,15 @@ import type { ChalkInstance } from "chalk";
 import type { OutlineType } from "../outlines";
 import outlines from "../outlines";
 import chalk from "chalk";
-import Screen, { type RenderTarget } from "../screen";
+import Screen, { type Parent, type ElementPosition } from "../screen";
 import stringLength from "string-length";
 import fuckery from "../fuckery";
 
 type BoxConfig = {
-  top: number;
-  left: number;
-  bottom: number;
-  right: number;
+  position: ElementPosition;
+  padding: ElementPosition;
   title: string;
   titlePadding: number;
-  paddingTop: number;
-  paddingLeft: number;
-  paddingBottom: number;
-  paddingRight: number;
   isOutlined: boolean;
   outlineType: OutlineType;
   outlineStyle: ChalkInstance;
@@ -24,27 +18,31 @@ type BoxConfig = {
 };
 
 const defaults: BoxConfig = {
-  top: 0,
-  left: 0,
-  bottom: 0,
-  right: 0,
+  position: {
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+  padding: {
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
   title: "",
-  titlePadding: 1,
-  paddingTop: 0,
-  paddingLeft: 0,
-  paddingBottom: 0,
-  paddingRight: 0,
+  titlePadding: 0,
   isOutlined: true,
   outlineType: outlines.line,
   outlineStyle: chalk.gray,
   titleStyle: chalk.white,
 };
 
-export default function Box<P extends RenderTarget>(
+export default function Box<P extends Parent>(
   _config: Partial<BoxConfig>,
-  parent?: P,
+  _parent?: P,
 ) {
-  const target = parent ?? Screen;
+  const parent = _parent ?? Screen;
 
   let drewOutline = false;
   let drewTitle = false;
@@ -52,6 +50,14 @@ export default function Box<P extends RenderTarget>(
   let config: BoxConfig = {
     ...defaults,
     ..._config,
+  };
+  config.position = {
+    ...defaults.position,
+    ..._config.position,
+  };
+  config.padding = {
+    ...defaults.padding,
+    ..._config.padding,
   };
 
   return {
@@ -76,7 +82,7 @@ export default function Box<P extends RenderTarget>(
         // add style
         lines = lines.map((line) => config.outlineStyle(line));
 
-        target.render(lines, config.left, config.top);
+        parent.render(lines, config.position.left, config.position.top);
 
         drewOutline = true;
       }
@@ -85,7 +91,11 @@ export default function Box<P extends RenderTarget>(
         const title = `${padding}${config.titleStyle(config.title)}${padding}`;
         const offset = Math.round((this.width() - stringLength(title)) / 2);
 
-        target.render([title], config.left + offset, config.top);
+        parent.render(
+          [title],
+          config.position.left + offset,
+          config.position.top,
+        );
 
         drewTitle = true;
       }
@@ -94,22 +104,22 @@ export default function Box<P extends RenderTarget>(
       lines = lines
         .slice(
           0,
-          this.height() - y - 2 - config.paddingTop - config.paddingBottom,
+          this.height() - y - 2 - config.padding.top - config.padding.bottom,
         )
         .map((line) =>
           fuckery.sliceString(
             line,
-            this.width() - x - 2 - config.paddingLeft - config.paddingRight,
+            this.width() - x - 2 - config.padding.left - config.padding.right,
           ),
         );
-      target.render(
+      parent.render(
         lines,
-        config.left + x + config.paddingLeft + 1,
-        config.top + y + config.paddingTop + 1,
+        config.position.left + x + config.padding.left + 1,
+        config.position.top + y + config.padding.top + 1,
       );
     },
     clear() {
-      target.render(
+      parent.render(
         `${" ".repeat(this.width())}\n`.repeat(this.height()).split("\n"),
         0,
         0,
@@ -129,27 +139,27 @@ export default function Box<P extends RenderTarget>(
       config.title = title;
     },
     width() {
-      return config.right - config.left;
+      return config.position.right - config.position.left;
     },
     height() {
-      return config.bottom - config.top;
+      return config.position.bottom - config.position.top;
     },
     viewportWidth() {
       return (
-        config.right -
-        config.left -
+        config.position.right -
+        config.position.left -
         2 -
-        config.paddingLeft -
-        config.paddingRight
+        config.padding.left -
+        config.padding.right
       );
     },
     viewportHeight() {
       return (
-        config.bottom -
-        config.top -
+        config.position.bottom -
+        config.position.top -
         2 -
-        config.paddingTop -
-        config.paddingBottom
+        config.padding.top -
+        config.padding.bottom
       );
     },
     config,

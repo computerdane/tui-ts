@@ -3,23 +3,26 @@ import Box from "./src/components/box";
 import chalk from "chalk";
 import Paragrah from "./src/components/paragraph";
 import outlines from "./src/outlines";
+import ShellCommand from "./src/components/shell-command";
 
 Screen.hideCursor();
 Screen.clear();
 
 let box = Box(
   {
-    top: 0,
-    left: 0,
-    bottom: Screen.viewportHeight() - 13,
-    right: Screen.viewportWidth() - 13,
-    title: "hello",
-    titleStyle: chalk.blue,
-    outlineType: outlines.thiccline,
-    // paddingTop: 2,
-    // paddingLeft: 1,
-    // paddingRight: 3,
-    // paddingBottom: 4,
+    position: {
+      top: 0,
+      left: 0,
+      bottom: Screen.viewportHeight(),
+      right: Screen.viewportWidth(),
+    },
+    padding: {
+      top: 3,
+      left: 20,
+      bottom: 3,
+      right: 20,
+    },
+    isOutlined: false,
   },
   Screen,
 );
@@ -28,10 +31,12 @@ box.draw();
 
 let child = Box(
   {
-    top: 2,
-    left: 3,
-    bottom: 20,
-    right: 100,
+    position: {
+      top: 0,
+      left: 0,
+      bottom: box.viewportHeight(),
+      right: box.viewportWidth(),
+    },
     title: "cool text",
     titleStyle: chalk.red,
     outlineType: outlines.doubleline,
