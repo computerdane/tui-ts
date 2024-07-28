@@ -1,4 +1,7 @@
-export type Drawable = {
+import readline from "node:readline";
+
+export type RenderTarget = {
+  cursorTo: (x: number, y: number) => void;
   render: (lines: string[], x: number, y: number) => void;
 };
 
@@ -9,11 +12,8 @@ const screen = {
   height() {
     return process.stdout.rows;
   },
-  cursorTo(x: number, y?: number) {
-    return process.stdout.cursorTo(x, y);
-  },
-  moveCursor(dx: number, dy: number) {
-    return process.stdout.moveCursor(dx, dy);
+  cursorTo(x: number, y: number) {
+    while (!readline.cursorTo(process.stdout, x, y)) {}
   },
   render(lines: string[], x: number, y: number) {
     for (const [row, line] of lines.entries()) {

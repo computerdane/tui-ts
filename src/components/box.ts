@@ -2,7 +2,7 @@ import type { ChalkInstance } from "chalk";
 import type { OutlineType } from "../outlines";
 import outlines from "../outlines";
 import chalk from "chalk";
-import screen, { type Drawable } from "../screen";
+import screen, { type RenderTarget } from "../screen";
 import stringLength from "string-length";
 
 type BoxConfig = {
@@ -35,8 +35,8 @@ const defaults: BoxConfig = {
   titleStyle: chalk.white,
 };
 
-function Box<P extends Drawable>(_config: Partial<BoxConfig>, parent?: P) {
-  const viewport = parent ?? screen;
+function Box<P extends RenderTarget>(_config: Partial<BoxConfig>, parent?: P) {
+  const target = parent ?? screen;
 
   let drewOutline = false;
   let drewTitle = false;
@@ -46,20 +46,17 @@ function Box<P extends Drawable>(_config: Partial<BoxConfig>, parent?: P) {
     ..._config,
   };
 
-  let width = config.right - config.left;
-  let height = config.bottom - config.top;
-
   return {
     draw() {
       if (config.isOutlined && !drewOutline) {
-        const outlineWidth = Math.max(0, width - 2);
+        const outlineWidth = Math.max(0, this.width() - 2);
 
         // top
         let lines = [
           `${config.outlineType.topLeft}${config.outlineType.top.repeat(outlineWidth)}${config.outlineType.topRight}`,
         ];
         // left/right
-        for (let i = 1; i < height - 1; i++) {
+        for (let i = 1; i < this.height() - 1; i++) {
           lines.push(
             `${config.outlineType.left}${" ".repeat(outlineWidth)}${config.outlineType.right}`,
           );
@@ -68,25 +65,36 @@ function Box<P extends Drawable>(_config: Partial<BoxConfig>, parent?: P) {
         lines.push(
           `${config.outlineType.bottomLeft}${config.outlineType.bottom.repeat(outlineWidth)}${config.outlineType.bottomRight}`,
         );
+        // add style
+        lines = lines.map((line) => config.outlineStyle(line));
 
-        viewport.render(lines, config.left, config.top);
+        target.render(lines, config.left, config.top);
 
         drewOutline = true;
       }
       if (config.title && !drewTitle) {
         const padding = " ".repeat(config.titlePadding);
         const title = `${padding}${config.titleStyle(config.title)}${padding}`;
-        const offset = Math.round((width - stringLength(title)) / 2);
+        const offset = Math.round((this.width() - stringLength(title)) / 2);
 
-        viewport.render([title], config.left + offset, config.top);
+        target.render([title], config.left + offset, config.top);
 
         drewTitle = true;
       }
     },
     render(lines: string[], x: number, y: number) {
       for (const [row, line] of lines.entries()) {
-        screen.cursorTo(config.left + x, config.top + y + row);
+        target.cursorTo(config.left + x, config.top + y + row);
         console.write(line);
+      }
+    },
+    cursorTo(x: number, y: number) {
+      return target.cursorTo(config.left + x, config.top + y);
+    },
+    clear() {
+      for (let row = 0; row < this.height(); row++) {
+        this.cursorTo(0, row);
+        console.write(" ".repeat(this.width()));
       }
     },
     setBounds(bounds: {
@@ -96,11 +104,17 @@ function Box<P extends Drawable>(_config: Partial<BoxConfig>, parent?: P) {
       right?: number;
     }) {
       config = { ...config, ...bounds };
-      width = config.right - config.left - 1;
-      height = config.bottom - config.top - 1;
+      drewOutline = false;
+      drewTitle = false;
     },
     setTitle(title: string) {
       config.title = title;
+    },
+    width() {
+      return config.right - config.left;
+    },
+    height() {
+      return config.bottom - config.top;
     },
     config,
   };

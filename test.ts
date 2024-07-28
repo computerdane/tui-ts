@@ -6,7 +6,7 @@ import chalk from "chalk";
 screen.hideCursor();
 screen.clear();
 
-const box = Box(
+let box = Box(
   {
     top: 0,
     left: 0,
@@ -14,44 +14,18 @@ const box = Box(
     right: screen.width(),
     title: "hello",
     titleStyle: chalk.blue,
-    titlePadding: 10,
   },
   screen,
 );
 
 box.draw();
 
-const children: any = [box];
+await sleep(2000);
 
-for (let i = 0; i < 2; i++) {
-  const child = Box(
-    {
-      top: 2,
-      left: 2,
-      bottom: children.at(-1).config.bottom - 2,
-      right: children.at(-1).config.right - 2,
-      title: "hello",
-      titleStyle: chalk.blue,
-      titlePadding: 10,
-    },
-    children.at(-1),
-  );
+box.clear();
 
-  child.draw();
+box.setBounds({ top: 2, left: 2, right: 20, bottom: 10 });
 
-  children.push(child);
-}
+box.draw();
 
-// const child = Box(
-//   {
-//     top: 2,
-//     left: 3,
-//     bottom: 10,
-//     right: 12,
-//   },
-//   box,
-// );
-
-// child.draw()
-
-sleep(10000);
+await sleep(10000);
