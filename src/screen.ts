@@ -1,15 +1,16 @@
 import readline from "node:readline";
 
 export type RenderTarget = {
-  cursorTo: (x: number, y: number) => void;
   render: (lines: string[], x: number, y: number) => void;
+  viewportWidth: () => number;
+  viewportHeight: () => number;
 };
 
-const screen = {
-  width() {
+const Screen = {
+  viewportWidth() {
     return process.stdout.columns;
   },
-  height() {
+  viewportHeight() {
     return process.stdout.rows;
   },
   cursorTo(x: number, y: number) {
@@ -32,4 +33,4 @@ const screen = {
   },
 };
 
-export default screen;
+export default Screen;

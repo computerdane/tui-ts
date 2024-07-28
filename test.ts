@@ -1,41 +1,59 @@
-import screen from "./src/screen";
+import Screen from "./src/screen";
 import Box from "./src/components/box";
 import { sleep } from "bun";
 import chalk from "chalk";
+import Paragrah from "./src/components/paragraph";
+import outlines from "./src/outlines";
 
-screen.hideCursor();
-screen.clear();
+Screen.hideCursor();
+Screen.clear();
 
 let box = Box(
   {
     top: 0,
     left: 0,
-    bottom: screen.height() - 13,
-    right: screen.width() - 13,
+    bottom: Screen.viewportHeight() - 13,
+    right: Screen.viewportWidth() - 13,
     title: "hello",
     titleStyle: chalk.blue,
-    paddingTop: 2,
-    paddingLeft: 1,
-    paddingRight: 3,
-    paddingBottom: 4,
+    // paddingTop: 2,
+    // paddingLeft: 1,
+    // paddingRight: 3,
+    // paddingBottom: 4,
   },
-  screen,
+  Screen,
 );
 
 box.draw();
 
 let child = Box(
   {
-    top: 0,
-    left: 0,
-    bottom: screen.height(),
-    right: screen.width(),
-    title: "hello",
-    titleStyle: chalk.blue,
+    top: 2,
+    left: 3,
+    bottom: 20,
+    right: 100,
+    title: "cool text",
+    titleStyle: chalk.red,
+    outlineType: outlines.doubleline,
   },
   box,
 );
 
 child.draw();
+
+const text = await (
+  await fetch("https://www.gnu.org/licenses/gpl-3.0.txt")
+).text();
+
+let p = Paragrah(
+  {
+    content: text,
+    style: chalk.red,
+    enableWrapping: true,
+  },
+  child,
+);
+
+p.draw();
 
 await sleep(10000);

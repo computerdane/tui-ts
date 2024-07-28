@@ -2,8 +2,9 @@ import type { ChalkInstance } from "chalk";
 import type { OutlineType } from "../outlines";
 import outlines from "../outlines";
 import chalk from "chalk";
-import screen, { type RenderTarget } from "../screen";
+import Screen, { type RenderTarget } from "../screen";
 import stringLength from "string-length";
+import fuckery from "../fuckery";
 
 type BoxConfig = {
   top: number;
@@ -39,8 +40,11 @@ const defaults: BoxConfig = {
   titleStyle: chalk.white,
 };
 
-function Box<P extends RenderTarget>(_config: Partial<BoxConfig>, parent?: P) {
-  const target = parent ?? screen;
+export default function Box<P extends RenderTarget>(
+  _config: Partial<BoxConfig>,
+  parent?: P,
+) {
+  const target = parent ?? Screen;
 
   let drewOutline = false;
   let drewTitle = false;
@@ -87,33 +91,29 @@ function Box<P extends RenderTarget>(_config: Partial<BoxConfig>, parent?: P) {
       }
     },
     render(lines: string[], x: number, y: number) {
-      for (let [row, line] of lines
+      lines = lines
         .slice(
           0,
           this.height() - y - 2 - config.paddingTop - config.paddingBottom,
         )
-        .entries()) {
-        this.cursorTo(
-          config.left + x + config.paddingLeft,
-          config.top + y + config.paddingTop + row,
+        .map((line) =>
+          fuckery.sliceString(
+            line,
+            this.width() - x - 2 - config.paddingLeft - config.paddingRight,
+          ),
         );
-        while (
-          stringLength(line) >
-          this.width() - x - 2 - config.paddingLeft - config.paddingRight
-        ) {
-          line = line.slice(0, -1);
-        }
-        console.write(line);
-      }
-    },
-    cursorTo(x: number, y: number) {
-      return target.cursorTo(config.left + x + 1, config.top + y + 1);
+      target.render(
+        lines,
+        config.left + x + config.paddingLeft + 1,
+        config.top + y + config.paddingTop + 1,
+      );
     },
     clear() {
-      for (let row = 0; row < this.height(); row++) {
-        this.cursorTo(0, row);
-        console.write(" ".repeat(this.width()));
-      }
+      target.render(
+        `${" ".repeat(this.width())}\n`.repeat(this.height()).split("\n"),
+        0,
+        0,
+      );
     },
     setBounds(bounds: {
       top?: number;
@@ -134,8 +134,24 @@ function Box<P extends RenderTarget>(_config: Partial<BoxConfig>, parent?: P) {
     height() {
       return config.bottom - config.top;
     },
+    viewportWidth() {
+      return (
+        config.right -
+        config.left -
+        2 -
+        config.paddingLeft -
+        config.paddingRight
+      );
+    },
+    viewportHeight() {
+      return (
+        config.bottom -
+        config.top -
+        2 -
+        config.paddingTop -
+        config.paddingBottom
+      );
+    },
     config,
   };
 }
-
-export default Box;
