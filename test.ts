@@ -3,7 +3,6 @@ import Box from "./src/components/box";
 import chalk from "chalk";
 import Paragrah from "./src/components/paragraph";
 import outlines from "./src/outlines";
-import ShellCommand from "./src/components/shell-command";
 
 Screen.hideCursor();
 Screen.clear();
@@ -23,6 +22,7 @@ let box = Box(
       right: 20,
     },
     isOutlined: false,
+    bgStyle: chalk.bgGreen,
   },
   Screen,
 );
@@ -38,8 +38,9 @@ let child = Box(
       right: box.viewportWidth(),
     },
     title: "cool text",
-    titleStyle: chalk.red,
     outlineType: outlines.doubleline,
+    bgStyle: chalk.bgBlue,
+    outlineStyle: chalk.bgMagenta,
   },
   box,
 );
@@ -52,8 +53,7 @@ const text = await (
 
 let p = Paragrah(
   {
-    content: text,
-    style: chalk.red,
+    content: chalk.bgBlue(chalk.white(text)),
     enableWrapping: true,
   },
   child,

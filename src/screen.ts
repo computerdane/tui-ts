@@ -8,10 +8,10 @@ export type Parent = {
 };
 
 export type ElementPosition = {
-  top?: number;
-  left?: number;
-  bottom?: number;
-  right?: number;
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
 };
 
 const Screen = {

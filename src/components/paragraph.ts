@@ -1,17 +1,13 @@
-import type { ChalkInstance } from "chalk";
-import chalk from "chalk";
 import Screen, { type Parent } from "../screen";
 import fuckery from "../fuckery";
 
 export type ParagraphConfig = {
   content: string;
-  style: ChalkInstance;
   enableWrapping: boolean;
 };
 
 const defaults: ParagraphConfig = {
   content: "",
-  style: chalk.white,
   enableWrapping: false,
 };
 
@@ -28,7 +24,7 @@ export default function Paragrah<P extends Parent>(
 
   return {
     draw() {
-      let lines = config.style(config.content).split("\n");
+      let lines = config.content.split("\n");
       if (config.enableWrapping) {
         const viewportWidth = parent.viewportWidth();
         const viewportHeight = parent.viewportHeight();

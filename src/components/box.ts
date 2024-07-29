@@ -14,7 +14,7 @@ type BoxConfig = {
   isOutlined: boolean;
   outlineType: OutlineType;
   outlineStyle: ChalkInstance;
-  titleStyle: ChalkInstance;
+  bgStyle: ChalkInstance;
 };
 
 const defaults: BoxConfig = {
@@ -35,7 +35,7 @@ const defaults: BoxConfig = {
   isOutlined: true,
   outlineType: outlines.line,
   outlineStyle: chalk.gray,
-  titleStyle: chalk.white,
+  bgStyle: chalk.reset,
 };
 
 export default function Box<P extends Parent>(
@@ -44,51 +44,43 @@ export default function Box<P extends Parent>(
 ) {
   const parent = _parent ?? Screen;
 
-  let drewOutline = false;
-  let drewTitle = false;
-
   let config: BoxConfig = {
     ...defaults,
     ..._config,
   };
-  config.position = {
-    ...defaults.position,
-    ..._config.position,
-  };
-  config.padding = {
-    ...defaults.padding,
-    ..._config.padding,
-  };
 
   return {
     draw() {
-      if (config.isOutlined && !drewOutline) {
+      let lines = [];
+      if (config.isOutlined) {
         const outlineWidth = Math.max(0, this.width() - 2);
-
         // top
-        let lines = [
+        lines.push(
           `${config.outlineType.topLeft}${config.outlineType.top.repeat(outlineWidth)}${config.outlineType.topRight}`,
-        ];
+        );
         // left/right
         for (let i = 1; i < this.height() - 1; i++) {
           lines.push(
-            `${config.outlineType.left}${" ".repeat(outlineWidth)}${config.outlineType.right}`,
+            `${config.outlineType.left}${config.bgStyle(" ").repeat(outlineWidth)}${config.outlineType.right}`,
           );
         }
         // bottom
         lines.push(
           `${config.outlineType.bottomLeft}${config.outlineType.bottom.repeat(outlineWidth)}${config.outlineType.bottomRight}`,
         );
-        // add style
-        lines = lines.map((line) => config.outlineStyle(line));
-
-        parent.render(lines, config.position.left, config.position.top);
-
-        drewOutline = true;
+      } else {
+        // left/right
+        for (let i = 0; i < this.height(); i++) {
+          lines.push(config.bgStyle(" ").repeat(this.width()));
+        }
       }
-      if (config.title && !drewTitle) {
+      // add style
+      lines = lines.map((line) => config.outlineStyle(line));
+      parent.render(lines, config.position.left, config.position.top);
+
+      if (config.title) {
         const padding = " ".repeat(config.titlePadding);
-        const title = `${padding}${config.titleStyle(config.title)}${padding}`;
+        const title = `${padding}${config.title}${padding}`;
         const offset = Math.round((this.width() - stringLength(title)) / 2);
 
         parent.render(
@@ -96,8 +88,6 @@ export default function Box<P extends Parent>(
           config.position.left + offset,
           config.position.top,
         );
-
-        drewTitle = true;
       }
     },
     render(lines: string[], x: number, y: number) {
@@ -118,25 +108,15 @@ export default function Box<P extends Parent>(
         config.position.top + y + config.padding.top + 1,
       );
     },
+    update(_config: Partial<BoxConfig>) {
+      config = { ...config, ..._config };
+    },
     clear() {
       parent.render(
         `${" ".repeat(this.width())}\n`.repeat(this.height()).split("\n"),
         0,
         0,
       );
-    },
-    setBounds(bounds: {
-      top?: number;
-      left?: number;
-      bottom?: number;
-      right?: number;
-    }) {
-      config = { ...config, ...bounds };
-      drewOutline = false;
-      drewTitle = false;
-    },
-    setTitle(title: string) {
-      config.title = title;
     },
     width() {
       return config.position.right - config.position.left;
