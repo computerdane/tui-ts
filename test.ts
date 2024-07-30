@@ -1,19 +1,66 @@
-import Screen from "./src/screen";
+import Tui from "./src/tui";
 import Box from "./src/components/box";
 import chalk from "chalk";
 import Paragrah from "./src/components/paragraph";
 import outlines from "./src/outlines";
+import Menubar from "./src/components/menubar";
 
-Screen.hideCursor();
-Screen.clear();
+Tui.hideCursor();
+Tui.clear();
+Tui.enableKeypressEvents();
+
+Tui.addKeypressHandler((_chunk, key) => {
+  if (key.name === "q" || (key.ctrl && key.name === "c")) {
+    Tui.clear();
+    Tui.showCursor();
+    process.exit();
+  }
+});
+
+let menubar = Menubar({
+  position: {
+    top: 0,
+    left: 0,
+    bottom: 5,
+    right: Tui.viewportWidth(),
+  },
+  items: [
+    "option " + chalk.red("1"),
+    "option " + chalk.red("2"),
+    "option " + chalk.red("3"),
+    "option " + chalk.red("4"),
+  ].map((i) => chalk.bold.bgGray(i)),
+  selectedItems: ["option 1", "option 2", "option 3", "option 4"].map((i) =>
+    chalk.bold.inverse(i),
+  ),
+  // alignY: "end",
+  isSelectable: true,
+  spacing: 5,
+  bgStyle: chalk.bgGray,
+});
+menubar.draw();
+
+Tui.addKeypressHandler((_chunk, key) => {
+  if (
+    key.name === "1" ||
+    key.name === "2" ||
+    key.name === "3" ||
+    key.name === "4"
+  ) {
+    menubar.update({
+      selectedIndex: parseInt(key.name) - 1,
+    });
+    menubar.draw();
+  }
+});
 
 let box = Box(
   {
     position: {
-      top: 0,
+      top: 5,
       left: 0,
-      bottom: Screen.viewportHeight(),
-      right: Screen.viewportWidth(),
+      bottom: Tui.viewportHeight(),
+      right: Tui.viewportWidth(),
     },
     padding: {
       top: 3,
@@ -24,7 +71,7 @@ let box = Box(
     isOutlined: false,
     bgStyle: chalk.bgGreen,
   },
-  Screen,
+  Tui,
 );
 
 box.draw();
@@ -53,14 +100,10 @@ const text = await (
 
 let p = Paragrah(
   {
-    content: chalk.bgBlue(chalk.white(text)),
+    content: chalk.bgBlue(chalk.black(text)),
     enableWrapping: true,
   },
   child,
 );
 
 p.draw();
-
-for await (const line of console) {
-  process.exit();
-}

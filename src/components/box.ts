@@ -2,7 +2,7 @@ import type { ChalkInstance } from "chalk";
 import type { OutlineType } from "../outlines";
 import outlines from "../outlines";
 import chalk from "chalk";
-import Screen, { type Parent, type ElementPosition } from "../screen";
+import Tui, { type Parent, type ElementPosition } from "../tui";
 import stringLength from "string-length";
 import fuckery from "../fuckery";
 
@@ -42,7 +42,7 @@ export default function Box<P extends Parent>(
   _config: Partial<BoxConfig>,
   _parent?: P,
 ) {
-  const parent = _parent ?? Screen;
+  const parent = _parent ?? Tui;
 
   let config: BoxConfig = {
     ...defaults,

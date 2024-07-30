@@ -1,4 +1,4 @@
-import Screen, { type Parent } from "../screen";
+import Tui, { type Parent } from "../tui";
 import fuckery from "../fuckery";
 
 export type ParagraphConfig = {
@@ -15,7 +15,7 @@ export default function Paragrah<P extends Parent>(
   _config: Partial<ParagraphConfig>,
   _parent?: P,
 ) {
-  const parent = _parent ?? Screen;
+  const parent = _parent ?? Tui;
 
   let config: ParagraphConfig = {
     ...defaults,

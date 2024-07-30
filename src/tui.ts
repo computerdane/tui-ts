@@ -14,7 +14,7 @@ export type ElementPosition = {
   right: number;
 };
 
-const Screen = {
+const Tui = {
   viewportWidth() {
     return process.stdout.columns;
   },
@@ -39,9 +39,29 @@ const Screen = {
   clear() {
     console.clear();
   },
+  enableKeypressEvents() {
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true);
+    }
+  },
+  addKeypressHandler(
+    handler: (
+      chunk: string,
+      key: {
+        sequence: string;
+        name: string;
+        ctrl: boolean;
+        meta: boolean;
+        shift: boolean;
+      },
+    ) => void,
+  ) {
+    process.stdin.on("keypress", handler);
+  },
   shell() {
     return os.platform() === "win32" ? "powershell.exe" : "bash";
   },
 };
 
-export default Screen;
+export default Tui;
