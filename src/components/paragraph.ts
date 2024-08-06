@@ -44,8 +44,8 @@ export default function Paragrah<P extends Parent>(
       }
       parent.render(lines, 0, 0);
     },
-    setContent(content: string) {
-      config.content = content;
+    update(_config: Partial<ParagraphConfig>) {
+      config = { ...config, ..._config };
     },
     config,
   };

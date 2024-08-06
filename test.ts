@@ -4,6 +4,8 @@ import chalk from "chalk";
 import Paragrah from "./src/components/paragraph";
 import outlines from "./src/outlines";
 import Menubar from "./src/components/menubar";
+import { sleep } from "bun";
+import { spawn } from "node:child_process";
 
 Tui.hideCursor();
 Tui.clear();
@@ -54,7 +56,7 @@ Tui.addKeypressHandler((_chunk, key) => {
   }
 });
 
-let box = Box(
+const box = Box(
   {
     position: {
       top: 5,
@@ -73,10 +75,9 @@ let box = Box(
   },
   Tui,
 );
-
 box.draw();
 
-let child = Box(
+const child = Box(
   {
     position: {
       top: 0,
@@ -91,13 +92,13 @@ let child = Box(
   },
   box,
 );
-
 child.draw();
 
-const text = await (
-  await fetch("https://www.gnu.org/licenses/gpl-3.0.txt")
-).text();
+// const text = await (
+//   await fetch("https://www.gnu.org/licenses/gpl-3.0.txt")
+// ).text();
 
+let text = "";
 let p = Paragrah(
   {
     content: chalk.bgBlue(chalk.black(text)),
@@ -106,4 +107,60 @@ let p = Paragrah(
   child,
 );
 
-p.draw();
+const subprocess = spawn(
+  "curl",
+  ["-s", "https://www.gnu.org/licenses/gpl-3.0.txt"],
+  {
+    stdio: ["pipe", "pipe", process.stderr],
+  },
+);
+subprocess.stdout.on("data", (chunk) => {
+  text += chunk;
+  p.update({
+    content: chalk.bgBlue(chalk.black(text)),
+  });
+  p.draw();
+});
+
+// subprocess.stdout.on("end", () => {
+//   console.log("ended");
+//   process.exit();
+// });
+
+process.on("SIGWINCH", async () => {
+  Tui.clear();
+
+  await sleep(1000);
+
+  menubar.update({
+    position: {
+      top: 0,
+      left: 0,
+      bottom: 5,
+      right: Tui.viewportWidth(),
+    },
+  });
+  menubar.draw();
+
+  box.update({
+    position: {
+      top: 5,
+      left: 0,
+      bottom: Tui.viewportHeight(),
+      right: Tui.viewportWidth(),
+    },
+  });
+  box.draw();
+
+  child.update({
+    position: {
+      top: 0,
+      left: 0,
+      bottom: box.viewportHeight(),
+      right: box.viewportWidth(),
+    },
+  });
+  child.draw();
+
+  p.draw();
+});
